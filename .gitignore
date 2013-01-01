@@ -23,5 +23,5 @@ local.properties
 .metadata
 .settings
 
-# mvn dirs
 target/
+tmp/
