@@ -22,3 +22,6 @@ local.properties
 .project
 .metadata
 .settings
+
+# mvn dirs
+target/
