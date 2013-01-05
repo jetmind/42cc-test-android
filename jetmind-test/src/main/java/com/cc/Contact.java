@@ -2,6 +2,7 @@ package com.cc;
 
 public class Contact {
 
+    private long id;
     private String label;
     private String value;
     private User user;
@@ -11,11 +12,27 @@ public class Contact {
         this.user = user;
     }
 
-    public Contact(String label, String value, User user) {
+    public Contact(User user, String label, String value) {
         super();
         this.label = label;
         this.value = value;
         this.user = user;
+    }
+
+    public Contact(User user, String label, String value, long id) {
+        super();
+        this.label = label;
+        this.value = value;
+        this.user = user;
+        this.id = id;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getLabel() {
