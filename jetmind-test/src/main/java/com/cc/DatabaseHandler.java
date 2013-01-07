@@ -16,6 +16,8 @@ import android.util.Log;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
+    private static final String TAG = "DatabaseHandler";
+
     // db info
     private static final String DB_NAME = "userinfo";
     private static final int DB_VERSION = 1;
@@ -46,7 +48,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             CONTACT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
             CONTACT_USER_ID + " INTEGER," +
             CONTACT_LABEL + " TEXT," +
-            CONTACT_VALUE + " TEXT" +
+            CONTACT_VALUE + " TEXT," +
             "FOREIGN KEY(" + CONTACT_USER_ID + ")" +
             " REFERENCES " + TABLE_USER + "(" + USER_ID + ")" + ")";
 
@@ -60,23 +62,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        Log.d("DatabaseHandler", "Creating db " + DB_NAME);
+        Log.d(TAG, "Creating db " + DB_NAME);
         db.execSQL(CREATE_TABLE_USER);
         db.execSQL(CREATE_TABLE_CONTACT);
-        Log.d("DatabaseHandler", "Db created. Inserting initial data.");
-        User user = new User();
-        user.setName("Igor");
-        user.setSurname("Bondarenko");
-        user.setBirth(new Date(1988, 3, 29));
-        user.setBio("Working as a Python developer at 42 Coffee Cups");
-        this.addUser(user);
-        this.addContact(new Contact(user, "Email", "jetmind2@gmail.com"));
-        this.addContact(new Contact(user, "Skype", "jetmind"));
+        init(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.d("DatabaseHandler",
+        Log.d(TAG,
                 "Updating db from version " + oldVersion + " to version " + newVersion +
                 ". All existing data will be destroyed.");
         db.execSQL(DROP_TABLE_CONTACT);
@@ -84,8 +78,30 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    /**
+     * Populate db with initial data;
+     */
+    public void init(SQLiteDatabase db) {
+        Log.d(TAG, "Populating db with initial data.");
+        User user = new User();
+        user.setName("Igor");
+        user.setSurname("Bondarenko");
+        user.setBirth(new Date(1988, 3, 29));
+        user.setBio("Working as a Python developer at 42 Coffee Cups");
+        this.addUser(user, db);
+        this.addContact(new Contact(user, "Email", "jetmind2@gmail.com"), db);
+        this.addContact(new Contact(user, "Skype", "jetmind"), db);
+    }
+
     public void addUser(User user) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        addUser(user, null);
+    }
+
+    protected void addUser(User user, SQLiteDatabase db0) {
+        SQLiteDatabase db = db0;
+        if (db == null) {
+            db = this.getWritableDatabase();
+        }
         ContentValues values = new ContentValues();
         values.put(USER_NAME, user.getName());
         values.put(USER_SURNAME, user.getSurname());
@@ -100,7 +116,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     public void addContact(Contact contact) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        addContact(contact);
+    }
+
+    protected void addContact(Contact contact, SQLiteDatabase db0) {
+        SQLiteDatabase db = db0;
+        if (db == null) {
+            db = this.getWritableDatabase();
+        }
         ContentValues values = new ContentValues();
         values.put(CONTACT_LABEL, contact.getLabel());
         values.put(CONTACT_VALUE, contact.getValue());
@@ -114,25 +137,25 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Cursor cursor = db.query(TABLE_USER,
                 new String[] {USER_NAME, USER_SURNAME, USER_BIRTH, USER_BIO},
                 USER_ID + "=?", new String[] {String.valueOf(id)}, null, null, null, null);
-        if (cursor == null)
-            return null;
-        cursor.moveToFirst();
-        User user = new User();
-        user.setId(id);
-        user.setName(cursor.getString(0));
-        user.setSurname(cursor.getString(1));
-        Date birth = null;
-        try {
-            birth = new SimpleDateFormat(
-                    "yyyy-MM-dd", Locale.getDefault()).parse(cursor.getString(2));
-        } catch (ParseException e) {
-            Log.d("DatabaseHandler", "Can't parse date " + cursor.getString(2));
-            return null;
+        if (cursor != null && cursor.moveToFirst()) {
+            User user = new User();
+            user.setId(id);
+            user.setName(cursor.getString(0));
+            user.setSurname(cursor.getString(1));
+            Date birth = null;
+            try {
+                birth = new SimpleDateFormat(
+                        "yyyy-MM-dd", Locale.getDefault()).parse(cursor.getString(2));
+            } catch (ParseException e) {
+                Log.d(TAG, "Can't parse date " + cursor.getString(2));
+                return null;
+            }
+            user.setBirth(birth);
+            user.setBio(cursor.getString(3));
+            user.setContacts(this.getUserContacts(user));
+            return user;
         }
-        user.setBirth(birth);
-        user.setBio(cursor.getString(3));
-        user.setContacts(this.getUserContacts(user));
-        return user;
+        return null;
     }
 
     public List<Contact> getUserContacts(User user) {
