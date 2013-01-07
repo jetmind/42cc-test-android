@@ -106,17 +106,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(USER_NAME, user.getName());
         values.put(USER_SURNAME, user.getSurname());
         values.put(USER_BIO, user.getBio());
-        values.put(USER_BIRTH,
-                String.format("%s-%s-%s",
-                        user.getBirth().getYear(),
-                        user.getBirth().getMonth(),
-                        user.getBirth().getDate()));
+        if (user.getBirth() != null) {
+            values.put(USER_BIRTH,
+                    String.format("%s-%s-%s",
+                            user.getBirth().getYear(),
+                            user.getBirth().getMonth(),
+                            user.getBirth().getDate()));
+        }
         long id = db.insert(TABLE_USER, null, values);
         user.setId(id);
     }
 
     public void addContact(Contact contact) {
-        addContact(contact);
+        addContact(contact, null);
     }
 
     protected void addContact(Contact contact, SQLiteDatabase db0) {
@@ -143,12 +145,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             user.setName(cursor.getString(0));
             user.setSurname(cursor.getString(1));
             Date birth = null;
-            try {
-                birth = new SimpleDateFormat(
-                        "yyyy-MM-dd", Locale.getDefault()).parse(cursor.getString(2));
-            } catch (ParseException e) {
-                Log.d(TAG, "Can't parse date " + cursor.getString(2));
-                return null;
+            if (cursor.getString(2) != null) {
+                try {
+                    birth = new SimpleDateFormat(
+                            "yyyy-MM-dd", Locale.getDefault()).parse(cursor.getString(2));
+                } catch (ParseException e) {
+                    Log.d(TAG, "Can't parse date " + cursor.getString(2));
+                    return null;
+                }
             }
             user.setBirth(birth);
             user.setBio(cursor.getString(3));
