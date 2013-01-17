@@ -17,6 +17,7 @@ public class Contact {
         this.label = label;
         this.value = value;
         this.user = user;
+        this.id = user.getId();
     }
 
     public Contact(User user, String label, String value, long id) {

@@ -1,11 +1,8 @@
 package com.cc;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -65,7 +62,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Log.d(TAG, "Creating db " + DB_NAME);
         db.execSQL(CREATE_TABLE_USER);
         db.execSQL(CREATE_TABLE_CONTACT);
-        init(db);
     }
 
     @Override
@@ -76,21 +72,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL(DROP_TABLE_CONTACT);
         db.execSQL(DROP_TABLE_USER);
         onCreate(db);
-    }
-
-    /**
-     * Populate db with initial data;
-     */
-    public void init(SQLiteDatabase db) {
-        Log.d(TAG, "Populating db with initial data.");
-        User user = new User();
-        user.setName("Igor");
-        user.setSurname("Bondarenko");
-        user.setBirth(new Date(1988, 3, 29));
-        user.setBio("Working as a Python developer at 42 Coffee Cups");
-        this.addUser(user, db);
-        this.addContact(new Contact(user, "Email", "jetmind2@gmail.com"), db);
-        this.addContact(new Contact(user, "Skype", "jetmind"), db);
     }
 
     public void addUser(User user) {
@@ -106,13 +87,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(USER_NAME, user.getName());
         values.put(USER_SURNAME, user.getSurname());
         values.put(USER_BIO, user.getBio());
-        if (user.getBirth() != null) {
-            values.put(USER_BIRTH,
-                    String.format("%s-%s-%s",
-                            user.getBirth().getYear(),
-                            user.getBirth().getMonth(),
-                            user.getBirth().getDate()));
-        }
+        values.put(USER_BIRTH, user.getBirthDb());
         long id = db.insert(TABLE_USER, null, values);
         user.setId(id);
     }
@@ -144,17 +119,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             user.setId(id);
             user.setName(cursor.getString(0));
             user.setSurname(cursor.getString(1));
-            Date birth = null;
             if (cursor.getString(2) != null) {
                 try {
-                    birth = new SimpleDateFormat(
-                            "yyyy-MM-dd", Locale.getDefault()).parse(cursor.getString(2));
+                    user.setBirth(cursor.getString(2));
                 } catch (ParseException e) {
                     Log.d(TAG, "Can't parse date " + cursor.getString(2));
                     return null;
                 }
             }
-            user.setBirth(birth);
+
             user.setBio(cursor.getString(3));
             user.setContacts(this.getUserContacts(user));
             return user;
@@ -176,6 +149,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             contacts.add(new Contact(user, label, value, cid));
         }
         return contacts;
+    }
+
+    public void clean() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_CONTACT, null, null);
+        db.delete(TABLE_USER, null, null);
     }
 
 }

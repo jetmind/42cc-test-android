@@ -1,9 +1,7 @@
 package com.cc;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -33,8 +31,7 @@ public class MainActivity extends FragmentActivity {
         protected void onPostExecute(User user) {
             if (user != null) {
                 fio.setText(user.getName() + " " + user.getSurname());
-                birth.setText(new SimpleDateFormat(
-                        "MMMM dd, yyyy", Locale.getDefault()).format(user.getBirth()));
+                birth.setText(user.getBirthDisplay());
                 bio.setText(user.getBio());
                 StringBuilder sb = new StringBuilder();
                 if (user.getContacts() != null) {
@@ -58,17 +55,22 @@ public class MainActivity extends FragmentActivity {
 
             Log.i(TAG, "Saving data to db");
             User user = new User();
+            user.setId(USER_ID);
             user.setName(graphUser.getFirstName());
             user.setSurname(graphUser.getLastName());
-            //            user.setBirth(graphUser.getBirthday());
-            user.setBio((String) graphUser.getProperty("bio"));
-            Contact contact = new Contact(user, "Email", (String) graphUser.getProperty("email"));
-            Contact contact2 = new Contact(user, "Birthday", graphUser.getBirthday());
+            user.setBio(graphUser.getProperty("bio").toString());
+            try {
+                user.setBirth(graphUser.getBirthday());
+            } catch (java.text.ParseException e) {
+                e.printStackTrace();
+                Log.i(TAG, "Can't parse date");
+            }
+            Contact contact = new Contact(user, "Email", graphUser.getProperty("email").toString());
 
             DatabaseHandler db = new DatabaseHandler(MainActivity.this);
+            db.clean();
             db.addUser(user);
             db.addContact(contact);
-            db.addContact(contact2);
             db.close();
             return null;
         }
