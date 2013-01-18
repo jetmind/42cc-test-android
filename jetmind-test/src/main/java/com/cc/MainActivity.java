@@ -14,11 +14,14 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
@@ -26,7 +29,7 @@ import com.facebook.Session.OpenRequest;
 import com.facebook.SessionState;
 import com.facebook.model.GraphUser;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends SherlockActivity {
 
     private class FetchFromDb extends AsyncTask<Void, Void, User> {
         @Override
@@ -191,6 +194,19 @@ public class MainActivity extends FragmentActivity {
         if (state.isOpened()) {
             new FetchFromFacebook().execute();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getSupportMenuInflater().inflate(R.menu.activity_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Toast.makeText(this, "Clicked on " + item.getTitle(), Toast.LENGTH_SHORT).show();
+        return super.onOptionsItemSelected(item);
     }
 }
 
