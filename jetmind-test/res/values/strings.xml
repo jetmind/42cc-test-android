@@ -7,5 +7,10 @@
     <string name="photo_description">My Photo</string>
     <string name="app_id">488318071206332</string>
     <string name="title_activity_edit">Edit User Info</string>
+    <string name="hint_edit_name">Name</string>
+    <string name="hint_edit_surname">Surname</string>
+    <string name="hint_edit_birth">01/01/2000</string>
+    <string name="hint_edit_bio">Short biography</string>
+    <string name="hint_edit_contacts">Contacts (e.g. Email: your@email.com)</string>
 
 </resources>

@@ -9,20 +9,23 @@
         android:id="@+id/editName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textCapWords" />
+        android:inputType="textCapWords"
+        android:hint="@string/hint_edit_name" />
 
     <EditText
         android:id="@+id/editSurname"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textCapWords" />
+        android:inputType="textCapWords"
+        android:hint="@string/hint_edit_surname" />
 
     <EditText
         android:id="@+id/editBirth"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="date" >
+        android:inputType="date"
+        android:hint="@string/hint_edit_birth" >
 
         <requestFocus />
     </EditText>
@@ -31,12 +34,14 @@
         android:id="@+id/editBio"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textMultiLine" />
+        android:inputType="textMultiLine"
+        android:hint="@string/hint_edit_bio" />
 
     <EditText
         android:id="@+id/editContacts"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textMultiLine" />
+        android:inputType="textMultiLine"
+        android:hint="@string/hint_edit_contacts" />
 
 </LinearLayout>

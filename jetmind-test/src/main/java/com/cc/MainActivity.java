@@ -17,7 +17,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
@@ -36,7 +35,9 @@ public class MainActivity extends SherlockActivity {
         protected User doInBackground(Void... params) {
             Log.i(TAG, "Fetching data from db");
             DatabaseHandler db = new DatabaseHandler(MainActivity.this);
-            return db.getUser(USER_ID);
+            User user = db.getUser(USER_ID);
+            db.close();
+            return user;
         }
         @Override
         protected void onPostExecute(User user) {
@@ -205,7 +206,7 @@ public class MainActivity extends SherlockActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Toast.makeText(this, "Clicked on " + item.getTitle(), Toast.LENGTH_SHORT).show();
+        startActivity(new Intent(this, EditActivity.class));
         return super.onOptionsItemSelected(item);
     }
 }
