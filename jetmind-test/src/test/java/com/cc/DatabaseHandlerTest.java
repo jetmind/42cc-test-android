@@ -2,10 +2,9 @@ package com.cc;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
+import java.text.ParseException;
 import java.util.List;
 
 import org.junit.Before;
@@ -22,29 +21,15 @@ public class DatabaseHandlerTest {
     @Before
     public void setUp() {
         db = new DatabaseHandler(new MainActivity());
+        User user = new User();
+        user.setName("Test");
+        user.setSurname("User");
+        user.setBio("Test bio");
+        db.addUser(user);
     }
 
     @Test
-    public void shouldPopulateDbOnCreate() {
-        User user = db.getUser(1);
-        assertThat(user.getName(), equalTo("Igor"));
-        assertThat(user.getSurname(), equalTo("Bondarenko"));
-        assertThat(user.getBio(), equalTo("Working as a Python developer at 42 Coffee Cups"));
-        List<Contact> contacts = user.getContacts();
-        assertNotNull(contacts);
-        assertThat(contacts.isEmpty(), is(false));
-        Contact c = contacts.get(0);
-        assertThat(c.getLabel(), equalTo("Email"));
-        assertThat(c.getValue(), equalTo("jetmind2@gmail.com"));
-        assertThat(c.getUser(), equalTo(user));
-        c = contacts.get(1);
-        assertThat(c.getLabel(), equalTo("Skype"));
-        assertThat(c.getValue(), equalTo("jetmind"));
-        assertThat(c.getUser(), equalTo(user));
-    }
-
-    @Test
-    public void test_addUser() {
+    public void test_addUser() throws ParseException {
         User user = new User();
         user.setName("Darth");
         user.setSurname("Vader");
@@ -52,12 +37,13 @@ public class DatabaseHandlerTest {
                 "Was a jedi, known as Anakin Skywalker.\n" +
                 "Has a son: Luke";
         user.setBio(bio);
+        user.setBirth("01/01/2222");
         db.addUser(user);
         User userFromDb = db.getUser(2);
         assertThat(userFromDb.getName(), equalTo("Darth"));
         assertThat(userFromDb.getSurname(), equalTo("Vader"));
         assertThat(userFromDb.getBio(), equalTo(bio));
-        assertNull(userFromDb.getBirth());
+        assertThat(userFromDb.getBirthDisplay(), equalTo("January 01, 2222"));
         assertThat(userFromDb.getContacts().isEmpty(), is(true));
     }
 
@@ -66,7 +52,7 @@ public class DatabaseHandlerTest {
         User user = db.getUser(1);
         Contact c = new Contact(user, "Phone", "555-555-555");
         db.addContact(c);
-        Contact contactFromDb = db.getUserContacts(user).get(2);
+        Contact contactFromDb = db.getUserContacts(user).get(0);
         assertThat(contactFromDb.getLabel(), equalTo("Phone"));
         assertThat(contactFromDb.getValue(), equalTo("555-555-555"));
     }
@@ -76,9 +62,6 @@ public class DatabaseHandlerTest {
         User user = new User();
         user.setName("Darth");
         user.setSurname("Vader");
-        user.setBio("Born on Tatooine.\n" +
-                "Was a jedi, known as Anakin Skywalker.\n" +
-                "Has a son: Luke");
         db.addUser(user);
         db.addContact(new Contact(user, "Email", "darth.vader@deathstar.org"));
         db.addContact(new Contact(user, "Skype", "darth.vader"));
