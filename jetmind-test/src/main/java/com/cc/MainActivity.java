@@ -1,9 +1,17 @@
 package com.cc;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -29,6 +37,7 @@ public class MainActivity extends FragmentActivity {
         }
         @Override
         protected void onPostExecute(User user) {
+            Log.i(TAG, "Fetching user data from local storage");
             if (user != null) {
                 fio.setText(user.getName() + " " + user.getSurname());
                 birth.setText(user.getBirthDisplay());
@@ -41,6 +50,21 @@ public class MainActivity extends FragmentActivity {
                 }
                 sb.deleteCharAt(sb.length() - 1);
                 contacts.setText(sb.toString());
+
+                InputStream in = null;
+                try {
+                    in = openFileInput(PHOTO_FILENAME);
+                    photo.setImageBitmap(BitmapFactory.decodeStream(in));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    Log.d(TAG, "Can't find profile picture in the local storage");
+                } finally {
+                    try {
+                        if (in != null) { in.close(); }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
             super.onPostExecute(user);
         }
@@ -52,6 +76,32 @@ public class MainActivity extends FragmentActivity {
             Log.i(TAG, "Fetching data from facebook...");
             Response r = Request.executeAndWait(new Request(Session.getActiveSession(), "me"));
             GraphUser graphUser = r.getGraphObjectAs(GraphUser.class);
+            // fetch profile picture
+            URL avaUrl = null;
+            InputStream in = null;
+            OutputStream out = null;
+            try {
+                avaUrl = new URL("http://graph.facebook.com/" + graphUser.getId() + "/picture?type=normal");
+                in = avaUrl.openConnection().getInputStream();
+                out = openFileOutput(PHOTO_FILENAME, Context.MODE_PRIVATE);
+                byte[] buffer = new byte[4096];
+                while (in.read(buffer) >= 0) {
+                    out.write(buffer);
+                }
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                Log.d(TAG, "Bad profile picture url");
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.d(TAG, "Can't upload profile picture");
+            } finally {
+                try {
+                    if (in != null) { in.close(); }
+                    if (out != null) { out.close(); }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
 
             Log.i(TAG, "Saving data to db");
             User user = new User();
@@ -81,8 +131,9 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    private static String TAG = "jetmind-test";
-    private static long USER_ID = 1;
+    private static final String TAG = "jetmind-test";
+    private static final long USER_ID = 1;
+    private static final String PHOTO_FILENAME = "profile_photo.jpg";
 
     private static final List<String> PERMISSIONS = Arrays.asList(
             "email", "user_birthday", "user_about_me");
