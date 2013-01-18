@@ -25,7 +25,14 @@
             <version>3.0.0-SNAPSHOT</version>
             <type>apklib</type>
         </dependency>
+        <dependency>
+          <groupId>com.actionbarsherlock</groupId>
+          <artifactId>actionbarsherlock</artifactId>
+          <version>4.2.0</version>
+          <type>apklib</type>
+        </dependency>
 
+        <!-- test deps -->
         <dependency>
             <groupId>com.pivotallabs</groupId>
             <artifactId>robolectric</artifactId>
@@ -58,7 +65,7 @@
                     <resourceDirectory>${project.basedir}/res</resourceDirectory>
                     <nativeLibrariesDirectory>${project.basedir}/src/main/native</nativeLibrariesDirectory>
                     <sdk>
-                        <platform>8</platform>
+                        <platform>16</platform>
                     </sdk>
                     <undeployBeforeDeploy>true</undeployBeforeDeploy>
                 </configuration>

@@ -1,6 +1,7 @@
 *~
 *.swp
 facebook-android-sdk-3.0*
+sherlock/
 
 # built application files
 *.apk
